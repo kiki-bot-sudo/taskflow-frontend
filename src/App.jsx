@@ -73,7 +73,14 @@ export default function App() {
     try {
       const upd = await fetch(`${BASE}/activity/${actId}/task/${tarea.id}`, {
         method: "PUT", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...tarea, isCompleted: !tarea.isCompleted }),
+        body: JSON.stringify({ 
+          id: tarea.id,
+          activityId: actId,
+          title: tarea.title,
+          description: tarea.description,
+          isCompleted: !tarea.isCompleted,
+          dueTime: tarea.dueTime
+        }),
       }).then(r => r.json());
       setActs(p => p.map(a => {
         if (a.id !== actId) return a;
