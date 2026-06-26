@@ -89,11 +89,16 @@ export default function ActivityBlock({ a, onToggleTask, onDeleteTask, onAddTask
                   <span style={{ flex: 1, fontSize: 13, fontWeight: 500, color: t.isCompleted ? MUTED : TEXT, textDecoration: t.isCompleted ? "line-through" : "none" }}>
                     {t.title}
                   </span>
-                  {t.isCompleted && (
-                    <button onClick={() => onDeleteTask(a.id, t.id)} style={{ background: "none", border: "none", cursor: "pointer", color: "#333", fontSize: 18, padding: "0 4px", transition: "color .2s" }}
-                      onMouseEnter={e => e.currentTarget.style.color = "#FF4757"}
-                      onMouseLeave={e => e.currentTarget.style.color = "#333"}>×</button>
-                  )}
+                  {/* Botón eliminar - SIEMPRE visible */}
+                  <button onClick={() => {
+                    if (window.confirm(`¿Eliminar tarea "${t.title}"?`)) {
+                      onDeleteTask(a.id, t.id);
+                    }
+                  }} style={{ background: "none", border: "none", cursor: "pointer", color: MUTED, fontSize: 18, padding: "0 4px", transition: "color .2s" }}
+                    onMouseEnter={e => e.currentTarget.style.color = "#FF4757"}
+                    onMouseLeave={e => e.currentTarget.style.color = MUTED}>
+                    ✕
+                  </button>
                 </div>
 
                 {/* Countdown banner */}
