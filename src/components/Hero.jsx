@@ -8,7 +8,7 @@ export default function Hero({ activities, onVerDia, onNuevaActividad }) {
   return (
     <>
       {/* Fecha fija arriba izquierda */}
-      <p style={{ position:"absolute", top:28, left:"6vw", fontSize:12, fontWeight:700, letterSpacing:".2em", color:GOLD, textTransform:"uppercase", zIndex:10 }}>
+      <p style={{ position:"absolute", top:20, left:"5vw", fontSize:12, fontWeight:700, letterSpacing:".2em", color:GOLD, textTransform:"uppercase", zIndex:10, margin:0 }}>
         {new Date().toLocaleDateString("es-MX", { weekday:"long", day:"numeric", month:"long", year:"numeric" }).toUpperCase()}
       </p>
 
