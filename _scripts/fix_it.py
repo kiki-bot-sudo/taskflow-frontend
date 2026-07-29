@@ -1,3 +1,4 @@
+content = '''
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ToastProvider, useToast } from "./hooks/useToast";
 import Hero from "./components/Hero";
@@ -6,7 +7,7 @@ import ActivityBlock from "./components/ActivityBlock";
 import { BASE, BG, SURFACE, SURFACE2, BORDER, TEXT, MUTED, GOLD, GOLD2, CATS, sameDay } from "./constants";
 
 const inp = {
-  background: SURFACE2, border: `1px solid ${BORDER}`, color: TEXT,
+  background: SURFACE2, border: "1px solid " + BORDER, color: TEXT,
   padding: "12px 14px", borderRadius: 12, fontSize: 14,
   fontFamily: "inherit", outline: "none", width: "100%",
 };
@@ -26,12 +27,12 @@ function AppContent() {
   const load = useCallback(async d => {
     setLoading(true);
     try {
-      const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-      const url = sameDay(d, new Date()) ? `${BASE}/activity/today` : `${BASE}/activity/date/${iso}`;
+      const iso = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+      const url = sameDay(d, today) ? BASE + "/activity/today" : BASE + "/activity/date/" + iso;
       const acts = await fetch(url).then(r => r.json());
       const full = await Promise.all(
         (Array.isArray(acts) ? acts : []).map(async a => ({
-          ...a, tasks: await fetch(`${BASE}/activity/${a.id}/task`).then(r => r.json())
+          ...a, tasks: await fetch(BASE + "/activity/" + a.id + "/task").then(r => r.json())
         }))
       );
       setActs(full);
@@ -39,14 +40,13 @@ function AppContent() {
     setLoading(false);
   }, []);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-date-change es el patrón estándar aquí
   useEffect(() => { load(date); }, [date, load]);
 
   async function crearActividad() {
     if (!form.title.trim()) return;
     try {
       const d = new Date(date); d.setHours(12, 0, 0, 0);
-      const a = await fetch(`${BASE}/activity`, {
+      const a = await fetch(BASE + "/activity", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, date: d.toISOString() }),
       }).then(r => r.json());
@@ -59,7 +59,7 @@ function AppContent() {
 
   async function onAddTask(actId, title, dueTime) {
     try {
-      const t = await fetch(`${BASE}/activity/${actId}/task`, {
+      const t = await fetch(BASE + "/activity/" + actId + "/task", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, description: "", dueTime: dueTime ? new Date(dueTime).toISOString() : null }),
       }).then(r => r.json());
@@ -70,7 +70,7 @@ function AppContent() {
 
   async function onToggleTask(actId, tarea) {
     try {
-      const upd = await fetch(`${BASE}/activity/${actId}/task/${tarea.id}`, {
+      const upd = await fetch(BASE + "/activity/" + actId + "/task/" + tarea.id, {
         method: "PUT", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           id: tarea.id,
@@ -88,15 +88,15 @@ function AppContent() {
         if (done && !a.isCompleted) showToast("🎉 ¡Actividad completada!", "success");
         return { ...a, tasks, isCompleted: done };
       }));
-    } catch { showToast("Error al actualizar tarea", "error"); }
+    } catch {}
   }
 
   async function onDeleteTask(actId, tid) {
     try {
-      await fetch(`${BASE}/activity/${actId}/task/${tid}`, { method: "DELETE" });
+      await fetch(BASE + "/activity/" + actId + "/task/" + tid, { method: "DELETE" });
       setActs(p => p.map(a => a.id !== actId ? a : { ...a, tasks: a.tasks.filter(t => t.id !== tid) }));
       showToast("Tarea eliminada", "info");
-    } catch { showToast("Error al eliminar tarea", "error"); }
+    } catch {}
   }
 
   const shown = filter === "pending" ? activities.filter(a => !a.isCompleted)
@@ -161,7 +161,7 @@ function AppContent() {
                 cursor: "pointer", letterSpacing: ".04em", transition: "all .2s",
                 background: filter === v ? GOLD : SURFACE,
                 color: filter === v ? BG : MUTED,
-                border: filter === v ? "none" : `1px solid ${BORDER}`,
+                border: filter === v ? "none" : "1px solid " + BORDER,
               }}>{l} <span style={{ opacity: .5 }}>{c}</span></button>
             ))}
           </div>
@@ -178,7 +178,7 @@ function AppContent() {
           {/* Spinner */}
           {loading && (
             <div style={{ display: "flex", justifyContent: "center", padding: "4rem 0" }}>
-              <div style={{ width: 36, height: 36, border: `3px solid ${BORDER}`, borderTopColor: GOLD, borderRadius: "50%", animation: "spin .7s linear infinite" }} />
+              <div style={{ width: 36, height: 36, border: "3px solid " + BORDER, borderTopColor: GOLD, borderRadius: "50%", animation: "spin .7s linear infinite" }} />
             </div>
           )}
 
@@ -186,7 +186,7 @@ function AppContent() {
           {!loading && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(320px,1fr))", gap: 16 }}>
               {shown.map((a, i) => (
-                <div key={a.id} style={{ animation: `fadeIn .3s ease ${i * .06}s both` }}>
+                <div key={a.id} style={{ animation: "fadeIn .3s ease " + (i * .06) + "s both" }}>
                   <ActivityBlock
                     a={a}
                     onToggleTask={onToggleTask}
@@ -212,7 +212,7 @@ function AppContent() {
       {/* Modal nueva actividad */}
       {showModal && (
         <div onClick={e => e.target === e.currentTarget && setShowModal(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, backdropFilter: "blur(8px)" }}>
-          <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 24, padding: "2rem", width: 440, animation: "popIn .2s ease" }}>
+          <div style={{ background: SURFACE, border: "1px solid " + BORDER, borderRadius: 24, padding: "2rem", width: 440, animation: "popIn .2s ease" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
               <h2 style={{ fontSize: 20, fontWeight: 800 }}>Nueva actividad</h2>
               <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", color: MUTED, fontSize: 24, cursor: "pointer" }}>×</button>
@@ -231,7 +231,7 @@ function AppContent() {
                 </select>
               </div>
               <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
-                <button onClick={() => setShowModal(false)} style={{ flex: 1, padding: "13px", borderRadius: 14, border: `1px solid ${BORDER}`, background: "none", fontSize: 14, cursor: "pointer", color: MUTED }}>Cancelar</button>
+                <button onClick={() => setShowModal(false)} style={{ flex: 1, padding: "13px", borderRadius: 14, border: "1px solid " + BORDER, background: "none", fontSize: 14, cursor: "pointer", color: MUTED }}>Cancelar</button>
                 <button onClick={crearActividad} style={{ flex: 2, padding: "13px", borderRadius: 14, border: "none", background: GOLD, color: BG, fontSize: 14, fontWeight: 800, cursor: "pointer" }}>CREAR</button>
               </div>
             </div>
@@ -249,3 +249,8 @@ export default function App() {
     </ToastProvider>
   );
 }
+'''
+
+with open('src/App.jsx', 'w', encoding='utf-8') as f:
+    f.write(content)
+print('Done')
