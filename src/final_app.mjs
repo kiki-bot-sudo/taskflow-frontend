@@ -1,4 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import fs from 'fs';
+
+const newContent = `import { useState, useEffect, useCallback, useRef } from "react";
 import { ToastProvider, useToast } from "./hooks/useToast";
 import Hero from "./components/Hero";
 import Calendar from "./components/Calendar";
@@ -6,7 +8,7 @@ import ActivityBlock from "./components/ActivityBlock";
 import { BASE, BG, SURFACE, SURFACE2, BORDER, TEXT, MUTED, GOLD, GOLD2, CATS, sameDay } from "./constants";
 
 const inp = {
-  background: SURFACE2, border: `1px solid ${BORDER}`, color: TEXT,
+  background: SURFACE2, border: "1px solid " + BORDER, color: TEXT,
   padding: "12px 14px", borderRadius: 12, fontSize: 14,
   fontFamily: "inherit", outline: "none", width: "100%",
 };
@@ -26,12 +28,12 @@ function AppContent() {
   const load = useCallback(async d => {
     setLoading(true);
     try {
-      const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-      const url = sameDay(d, today) ? `${BASE}/activity/today` : `${BASE}/activity/date/${iso}`;
+      const iso = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+      const url = sameDay(d, today) ? BASE + "/activity/today" : BASE + "/activity/date/" + iso;
       const acts = await fetch(url).then(r => r.json());
       const full = await Promise.all(
         (Array.isArray(acts) ? acts : []).map(async a => ({
-          ...a, tasks: await fetch(`${BASE}/activity/${a.id}/task`).then(r => r.json())
+          ...a, tasks: await fetch(BASE + "/activity/" + a.id + "/task").then(r => r.json())
         }))
       );
       setActs(full);
@@ -45,31 +47,31 @@ function AppContent() {
     if (!form.title.trim()) return;
     try {
       const d = new Date(date); d.setHours(12, 0, 0, 0);
-      const a = await fetch(`${BASE}/activity`, {
+      const a = await fetch(BASE + "/activity", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, date: d.toISOString() }),
       }).then(r => r.json());
       setActs(p => [...p, { ...a, tasks: [] }]);
       setShowModal(false);
       setForm({ title: "", description: "", category: "Estudio", priority: "Normal" });
-      showToast("✓ Actividad creada", "success");
-    } catch { showToast("Error al crear", "error"); }
+      showToast("✓ Actividad creada", "success"success");
+    } catch { showToast("Error al crear", ""); }
   }
 
   async function onAddTask(actId, title, dueTime) {
     try {
-      const t = await fetch(`${BASE}/activity/${actId}/task`, {
+      const t = await fetch(BASE + "/activity/" + actId + "/task", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, description: "", dueTime: dueTime ? new Date(dueTime).toISOString() : null }),
       }).then(r => r.json());
       setActs(p => p.map(a => a.id !== actId ? a : { ...a, tasks: [...a.tasks, t] }));
-      showToast(dueTime ? "⏱ Tarea con deadline agregada" : "✓ Tarea agregada", "success");
-    } catch { showToast("Error al agregar tarea", "error"); }
+      showToast(dueTime ? "⏱ Tarea con deadline agregada" : "✓ Tarea agregada", "");
+    } catch { showToast("Error al agregar tarea", ""); }
   }
 
   async function onToggleTask(actId, tarea) {
     try {
-      const upd = await fetch(`${BASE}/activity/${actId}/task/${tarea.id}`, {
+      const upd = await fetch(BASE + "/activity/" + actId + "/task/" + tarea.id, {
         method: "PUT", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           id: tarea.id,
@@ -84,7 +86,7 @@ function AppContent() {
         if (a.id !== actId) return a;
         const tasks = a.tasks.map(t => t.id === tarea.id ? upd : t);
         const done  = tasks.length > 0 && tasks.every(t => t.isCompleted);
-        if (done && !a.isCompleted) showToast("🎉 ¡Actividad completada!", "success");
+        if (done && !a.isCompleted) showToast("🎉 ¡Actividad completada!", "");
         return { ...a, tasks, isCompleted: done };
       }));
     } catch {}
@@ -92,9 +94,9 @@ function AppContent() {
 
   async function onDeleteTask(actId, tid) {
     try {
-      await fetch(`${BASE}/activity/${actId}/task/${tid}`, { method: "DELETE" });
+      await fetch(BASE + "/activity/" + actId + "/task/" + tid, { method: "DELETE" });
       setActs(p => p.map(a => a.id !== actId ? a : { ...a, tasks: a.tasks.filter(t => t.id !== tid) }));
-      showToast("Tarea eliminada", "info");
+      showToast("Tarea eliminada", "");
     } catch {}
   }
 
@@ -160,7 +162,7 @@ function AppContent() {
                 cursor: "pointer", letterSpacing: ".04em", transition: "all .2s",
                 background: filter === v ? GOLD : SURFACE,
                 color: filter === v ? BG : MUTED,
-                border: filter === v ? "none" : `1px solid ${BORDER}`,
+                border: filter === v ? "none" : "1px solid " + BORDER,
               }}>{l} <span style={{ opacity: .5 }}>{c}</span></button>
             ))}
           </div>
@@ -177,7 +179,7 @@ function AppContent() {
           {/* Spinner */}
           {loading && (
             <div style={{ display: "flex", justifyContent: "center", padding: "4rem 0" }}>
-              <div style={{ width: 36, height: 36, border: `3px solid ${BORDER}`, borderTopColor: GOLD, borderRadius: "50%", animation: "spin .7s linear infinite" }} />
+              <div style={{ width: 36, height: 36, border: "3px solid " + BORDER, borderTopColor: GOLD, borderRadius: "50%", animation: "spin .7s linear infinite" }} />
             </div>
           )}
 
@@ -185,7 +187,7 @@ function AppContent() {
           {!loading && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(320px,1fr))", gap: 16 }}>
               {shown.map((a, i) => (
-                <div key={a.id} style={{ animation: `fadeIn .3s ease ${i * .06}s both` }}>
+                <div key={a.id} style={{ animation: "fadeIn .3s ease " + (i * .06) + "s both" }}>
                   <ActivityBlock
                     a={a}
                     onToggleTask={onToggleTask}
@@ -211,7 +213,7 @@ function AppContent() {
       {/* Modal nueva actividad */}
       {showModal && (
         <div onClick={e => e.target === e.currentTarget && setShowModal(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, backdropFilter: "blur(8px)" }}>
-          <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 24, padding: "2rem", width: 440, animation: "popIn .2s ease" }}>
+          <div style={{ background: SURFACE, border: "1px solid " + BORDER, borderRadius: 24, padding: "2rem", width: 440, animation: "popIn .2s ease" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
               <h2 style={{ fontSize: 20, fontWeight: 800 }}>Nueva actividad</h2>
               <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", color: MUTED, fontSize: 24, cursor: "pointer" }}>×</button>
@@ -230,7 +232,7 @@ function AppContent() {
                 </select>
               </div>
               <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
-                <button onClick={() => setShowModal(false)} style={{ flex: 1, padding: "13px", borderRadius: 14, border: `1px solid ${BORDER}`, background: "none", fontSize: 14, cursor: "pointer", color: MUTED }}>Cancelar</button>
+                <button onClick={() => setShowModal(false)} style={{ flex: 1, padding: "13px", borderRadius: 14, border: "1px solid " + BORDER, background: "none", fontSize: 14, cursor: "pointer", color: MUTED }}>Cancelar</button>
                 <button onClick={crearActividad} style={{ flex: 2, padding: "13px", borderRadius: 14, border: "none", background: GOLD, color: BG, fontSize: 14, fontWeight: 800, cursor: "pointer" }}>CREAR</button>
               </div>
             </div>
@@ -241,38 +243,13 @@ function AppContent() {
   );
 }
 
-function AppContent() {
-  return (
-    <ToastProvider>
-      <AppContent />
-    </ToastProvider>
-  );
-
-
-function AppContent() {
-  return (
-    <ToastProvider>
-      <AppContent />
-    </ToastProvider>
-  );
-}
-
-
 export default function App() {
   return (
     <ToastProvider>
       <AppContent />
     </ToastProvider>
   );
-}
-}
+}`;
 
-function AppContent() { return <ToastProvider><AppContent /></ToastProvider>; 
-
-function AppContent() {
-  return (
-    <ToastProvider>
-      <AppContent />
-    </ToastProvider>
-  );
-}}
+fs.writeFileSync('src/App.jsx', newContent);
+console.log('App.jsx written successfully');
