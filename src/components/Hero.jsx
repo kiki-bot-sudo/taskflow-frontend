@@ -1,65 +1,63 @@
-import { getGreeting, GOLD, BG, GOLD2, BORDER, MUTED, TEXT } from "../constants";
+import { ArrowRight, Plus } from "lucide-react";
+import { getGreeting } from "../constants";
+import { fmtFullDate } from "../lib/date";
 
 export default function Hero({ activities, onVerDia, onNuevaActividad }) {
-  const allT  = activities.flatMap(a => a.tasks);
-  const doneT = allT.filter(t => t.isCompleted).length;
-  const pct   = allT.length > 0 ? Math.round(doneT / allT.length * 100) : 0;
+  const allTasks = activities.flatMap((a) => a.tasks);
+  const done = allTasks.filter((t) => t.isCompleted).length;
+  const pct = allTasks.length > 0 ? Math.round((done / allTasks.length) * 100) : 0;
+
+  const stats = [
+    { label: "Actividades", value: activities.length },
+    { label: "Completadas", value: `${done}/${allTasks.length}` },
+    { label: "Progreso", value: `${pct}%`, accent: pct === 100 },
+  ];
 
   return (
-    <>
-      {/* Fecha fija arriba izquierda */}
-      <p style={{ position:"absolute", top:20, left:"5vw", fontSize:12, fontWeight:700, letterSpacing:".2em", color:GOLD, textTransform:"uppercase", zIndex:10, margin:0 }}>
-        {new Date().toLocaleDateString("es-MX", { weekday:"long", day:"numeric", month:"long", year:"numeric" }).toUpperCase()}
+    <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden border-b border-line px-6 py-24 text-center">
+      {/* Ficha con fecha, como un sello de ledger */}
+      <p className="mb-8 rounded-full border border-line bg-paper-light px-4 py-1.5 font-mono text-xs font-semibold tracking-widest text-ink-soft uppercase">
+        {fmtFullDate(new Date()).toUpperCase()}
       </p>
 
-      <section style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        textAlign: "center",
-        padding: "0 6vw",
-        position: "relative",
-        borderBottom: `1px solid ${BORDER}`,
-      }}>
-        {/* Glow */}
-        <div style={{ position:"absolute", inset:0, background:`radial-gradient(ellipse at 50% 50%, ${GOLD}0A 0%, transparent 60%)`, pointerEvents:"none" }} />
+      <h1 className="font-display text-[clamp(3.5rem,11vw,8rem)] leading-[0.92] font-black tracking-tight text-ink text-balance">
+        Task<span className="text-thread italic">Flow</span>
+      </h1>
 
-        {/* TASKFLOW */}
-        <h1 style={{ fontSize:"clamp(64px,10vw,130px)", fontWeight:900, lineHeight:.9, letterSpacing:"-.03em", marginBottom:16 }}>
-          <span style={{ color:TEXT }}>TASK</span><span style={{ color:GOLD }}>FLOW</span>
-        </h1>
+      <p className="mt-6 font-display text-[clamp(1.35rem,3vw,2rem)] font-medium text-ink-soft">
+        {getGreeting()}. Así va tu hilo de hoy.
+      </p>
 
-        {/* Saludo */}
-        <p style={{ fontSize:"clamp(20px,3vw,40px)", fontWeight:800, color:TEXT, marginBottom:52, letterSpacing:"-.01em" }}>
-          {getGreeting()}
-        </p>
+      <div className="mt-12 flex flex-wrap items-center justify-center gap-3">
+        <button
+          onClick={onVerDia}
+          className="group inline-flex items-center gap-2 rounded-full bg-thread px-8 py-4 text-sm font-bold tracking-wide text-paper-light shadow-card transition hover:bg-thread-light hover:shadow-card-hover"
+        >
+          Ver mi día
+          <ArrowRight size={16} className="transition group-hover:translate-x-0.5" />
+        </button>
+        <button
+          onClick={onNuevaActividad}
+          className="inline-flex items-center gap-2 rounded-full border border-ink/20 bg-transparent px-8 py-4 text-sm font-bold text-ink transition hover:border-thread hover:text-thread"
+        >
+          <Plus size={16} />
+          Nueva actividad
+        </button>
+      </div>
 
-        {/* Botones */}
-        <div style={{ display:"flex", gap:14, flexWrap:"wrap", justifyContent:"center" }}>
-          <button onClick={onVerDia} style={{ background:GOLD, color:BG, border:"none", padding:"16px 40px", borderRadius:99, fontSize:15, fontWeight:800, cursor:"pointer", letterSpacing:".04em", transition:"all .2s" }}
-            onMouseEnter={e=>{ e.currentTarget.style.background=GOLD2; e.currentTarget.style.transform="scale(1.04)"; }}
-            onMouseLeave={e=>{ e.currentTarget.style.background=GOLD; e.currentTarget.style.transform="none"; }}>
-            VER MI DÍA →
-          </button>
-          <button onClick={onNuevaActividad} style={{ background:"none", color:TEXT, border:`1.5px solid ${BORDER}`, padding:"16px 40px", borderRadius:99, fontSize:15, fontWeight:700, cursor:"pointer", transition:"all .2s" }}
-            onMouseEnter={e=>{ e.currentTarget.style.borderColor=GOLD; e.currentTarget.style.color=GOLD; }}
-            onMouseLeave={e=>{ e.currentTarget.style.borderColor=BORDER; e.currentTarget.style.color=TEXT; }}>
-            + NUEVA ACTIVIDAD
-          </button>
-        </div>
+      {/* Puntada divisoria */}
+      <div className="stitch-divider mt-16 w-full max-w-md" />
 
-        {/* Stats */}
-        <div style={{ display:"flex", gap:56, marginTop:80, flexWrap:"wrap", justifyContent:"center" }}>
-          {[["ACTIVIDADES",activities.length],["COMPLETADAS",`${doneT}/${allT.length}`],["PROGRESO",`${pct}%`]].map(([l,v])=>(
-            <div key={l} style={{ textAlign:"center" }}>
-              <p style={{ fontSize:"clamp(32px,5vw,56px)", fontWeight:900, color:l==="PROGRESO"&&pct===100?GOLD:TEXT, marginBottom:6 }}>{v}</p>
-              <p style={{ fontSize:11, color:MUTED, fontWeight:600, letterSpacing:".15em" }}>{l}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-    </>
+      <div className="mt-10 flex flex-wrap items-center justify-center gap-10 sm:gap-16">
+        {stats.map((s) => (
+          <div key={s.label} className="text-center">
+            <p className={`font-mono text-[clamp(2rem,5vw,3.25rem)] font-bold ${s.accent ? "text-done" : "text-ink"}`}>
+              {s.value}
+            </p>
+            <p className="mt-1 text-[11px] font-semibold tracking-widest text-ink-faint uppercase">{s.label}</p>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }

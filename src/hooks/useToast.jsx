@@ -1,4 +1,7 @@
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useCallback, useContext, useState } from "react";
+import { CheckCircle2, Info, TriangleAlert, XCircle } from "lucide-react";
+import { cn } from "../lib/cn";
+
 const ToastContext = createContext(null);
 
 export function ToastProvider({ children }) {
@@ -6,15 +9,13 @@ export function ToastProvider({ children }) {
 
   const showToast = useCallback((message, type = "info", duration = 3000) => {
     const id = Date.now() + Math.random();
-    setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id));
-    }, duration);
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), duration);
     return id;
   }, []);
 
   const hideToast = useCallback((id) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
+    setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
   return (
@@ -34,56 +35,35 @@ export function useToast() {
 
 function ToastContainer({ toasts, onHide }) {
   if (toasts.length === 0) return null;
-
   return (
-    <div style={{
-      position: "fixed",
-      bottom: 24,
-      left: "50%",
-      transform: "translateX(-50%)",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: 8,
-      zIndex: 9999,
-      pointerEvents: "none"
-    }}>
-      {toasts.map(toast => (
+    <div className="pointer-events-none fixed bottom-6 left-1/2 z-[9999] flex -translate-x-1/2 flex-col items-center gap-2">
+      {toasts.map((toast) => (
         <ToastItem key={toast.id} toast={toast} onHide={onHide} />
       ))}
     </div>
   );
 }
 
+const VARIANTS = {
+  info: { icon: Info, className: "bg-cat-personal text-paper-light" },
+  success: { icon: CheckCircle2, className: "bg-done text-paper-light" },
+  error: { icon: XCircle, className: "bg-thread text-paper-light" },
+  warning: { icon: TriangleAlert, className: "bg-priority-normal text-ink" },
+};
+
 function ToastItem({ toast, onHide }) {
-  const styles = {
-    info: { background: "#1E90FF", color: "#fff" },
-    success: { background: "#2ED573", color: "#0A0A0A" },
-    error: { background: "#FF4757", color: "#fff" },
-    warning: { background: "#F0C040", color: "#0A0A0A" },
-  };
-
-  const style = styles[toast.type] || styles.info;
-
+  const { icon: Icon, className } = VARIANTS[toast.type] || VARIANTS.info;
   return (
     <div
-      style={{
-        pointerEvents: "auto",
-        padding: "12px 28px",
-        borderRadius: 9999,
-        fontSize: 14,
-        fontWeight: 700,
-        boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-        animation: "slideUp .3s ease",
-        background: style.background,
-        color: style.color,
-        whiteSpace: "nowrap",
-        cursor: "pointer",
-      }}
-      onClick={() => onHide(toast.id)}
       role="alert"
       aria-live="polite"
+      onClick={() => onHide(toast.id)}
+      className={cn(
+        "animate-slide-up pointer-events-auto flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-full px-5 py-3 text-sm font-semibold shadow-pop",
+        className
+      )}
     >
+      <Icon size={16} strokeWidth={2.5} />
       {toast.message}
     </div>
   );
