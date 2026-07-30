@@ -8,7 +8,7 @@ const TONE_TEXT = { high: "text-thread", normal: "text-priority-normal", low: "t
 const TONE_BG = { high: "bg-thread-soft", normal: "bg-priority-normal/15", low: "bg-done-soft" };
 const TONE_BORDER = { high: "var(--color-thread)", normal: "var(--color-priority-normal)", low: "var(--color-done)" };
 
-export default function ActivityCard({ activity, onToggleTask, onDeleteTask, onAddTask }) {
+export default function ActivityCard({ activity, onToggleTask, onDeleteTask, onAddTask, onAddSubTask, onToggleSubTask, onDeleteSubTask }) {
   const [addOpen, setAddOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [due, setDue] = useState("");
@@ -88,7 +88,7 @@ export default function ActivityCard({ activity, onToggleTask, onDeleteTask, onA
             const days = t.dueTime ? daysUntil(t.dueTime) : null;
             const countdown = days !== null ? countdownLabel(days) : null;
             return (
-              <li key={t.id}>
+              <li key={t.id} className="rounded-lg">
                 <div className="group flex items-center gap-2.5 rounded-lg px-2 py-2 transition hover:bg-paper">
                   <button
                     aria-label={t.isCompleted ? "Marcar como pendiente" : "Marcar como hecha"}
@@ -123,6 +123,34 @@ export default function ActivityCard({ activity, onToggleTask, onDeleteTask, onA
                     <span className={cn("text-[11px] font-semibold", TONE_TEXT[countdown.tone])}>{countdown.text}</span>
                   </div>
                 )}
+                <div className="ml-9 border-l border-dashed border-line pl-3">
+                  {(t.subTasks || []).map((subTask) => (
+                    <div key={subTask.id} className="group/sub flex items-center gap-2 py-1 text-xs text-ink-soft">
+                      <button
+                        aria-label={subTask.isCompleted ? "Marcar subtarea pendiente" : "Completar subtarea"}
+                        onClick={() => onToggleSubTask(activity.id, t.id, subTask)}
+                        className={cn("flex h-3.5 w-3.5 items-center justify-center rounded border", subTask.isCompleted ? "border-done bg-done" : "border-ink-faint")}
+                      >
+                        {subTask.isCompleted && <Check size={9} className="text-paper-light" />}
+                      </button>
+                      <span className={cn("flex-1", subTask.isCompleted && "line-through text-ink-faint")}>{subTask.title}</span>
+                      <button onClick={() => onDeleteSubTask(activity.id, t.id, subTask.id)} className="text-ink-faint opacity-0 hover:text-thread group-hover/sub:opacity-100"><X size={12}/></button>
+                    </div>
+                  ))}
+                  <form
+                    className="my-1 flex gap-1.5"
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      const input = event.currentTarget.elements.subTaskTitle;
+                      if (!input.value.trim()) return;
+                      onAddSubTask(activity.id, t.id, input.value.trim());
+                      input.value = "";
+                    }}
+                  >
+                    <input name="subTaskTitle" maxLength={100} placeholder="Agregar subtarea…" className="min-w-0 flex-1 border-b border-line bg-transparent px-1 py-1 text-[11px] outline-none focus:border-thread"/>
+                    <button className="text-[11px] font-bold text-thread">Agregar</button>
+                  </form>
+                </div>
               </li>
             );
           })}

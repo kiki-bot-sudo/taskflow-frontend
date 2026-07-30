@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { Plus } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { LogOut, Plus } from "lucide-react";
 import { ToastProvider } from "./hooks/useToast";
 import { useActivities } from "./hooks/useActivities";
 import Hero from "./components/Hero";
@@ -8,12 +8,14 @@ import ActivityCard from "./components/ActivityCard";
 import NewActivityModal from "./components/NewActivityModal";
 import EmptyState from "./components/EmptyState";
 import Loader from "./components/Loader";
+import AuthScreen from "./components/AuthScreen";
+import { api } from "./lib/api";
 import { cn } from "./lib/cn";
 import { fmtFullDate, isToday } from "./lib/date";
 
 const EMPTY_FORM = { title: "", description: "", category: "Estudio", priority: "Normal" };
 
-function AppContent() {
+function AppContent({ user, onLogout }) {
   const [date, setDate] = useState(new Date());
   const [weekOffset, setWeekOffset] = useState(0);
   const [filter, setFilter] = useState("all");
@@ -21,7 +23,7 @@ function AppContent() {
   const [form, setForm] = useState(EMPTY_FORM);
   const dashRef = useRef(null);
 
-  const { activities, loading, createActivity, addTask, toggleTask, deleteTask } = useActivities(date);
+  const { activities, loading, createActivity, addTask, toggleTask, deleteTask, addSubTask, toggleSubTask, deleteSubTask } = useActivities(date);
 
   async function handleCreate() {
     if (!form.title.trim()) return;
@@ -47,6 +49,10 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-paper text-ink">
+      <div className="fixed top-4 right-4 z-50 flex items-center gap-3 rounded-full border border-line bg-paper-light/95 px-4 py-2 text-xs shadow-card backdrop-blur">
+        <span className="font-bold text-ink">{user.displayName}</span>
+        <button onClick={onLogout} className="flex items-center gap-1 text-ink-faint transition hover:text-thread"><LogOut size={14}/> Salir</button>
+      </div>
       <Hero
         activities={activities}
         onVerDia={scrollToDash}
@@ -106,7 +112,7 @@ function AppContent() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {shown.map((a, i) => (
               <div key={a.id} className="animate-fade-up" style={{ animationDelay: `${i * 60}ms` }}>
-                <ActivityCard activity={a} onToggleTask={toggleTask} onDeleteTask={deleteTask} onAddTask={addTask} />
+                <ActivityCard activity={a} onToggleTask={toggleTask} onDeleteTask={deleteTask} onAddTask={addTask} onAddSubTask={addSubTask} onToggleSubTask={toggleSubTask} onDeleteSubTask={deleteSubTask} />
               </div>
             ))}
             {shown.length === 0 && <EmptyState filter={filter} />}
@@ -121,10 +127,30 @@ function AppContent() {
   );
 }
 
+function SessionApp() {
+  const [user, setUser] = useState(null);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    api.me().then(setUser).catch(() => setUser(null)).finally(() => setChecking(false));
+    const unauthorized = () => setUser(null);
+    window.addEventListener("taskflow:unauthorized", unauthorized);
+    return () => window.removeEventListener("taskflow:unauthorized", unauthorized);
+  }, []);
+
+  async function logout() {
+    await api.logout().catch(() => null);
+    setUser(null);
+  }
+
+  if (checking) return <Loader />;
+  return user ? <AppContent user={user} onLogout={logout} /> : <AuthScreen onAuthenticated={setUser} />;
+}
+
 export default function App() {
   return (
     <ToastProvider>
-      <AppContent />
+      <SessionApp />
     </ToastProvider>
   );
 }

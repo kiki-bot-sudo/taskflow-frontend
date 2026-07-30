@@ -1,4 +1,4 @@
-export const BASE = "https://localhost:57306/api";
+export const BASE = import.meta.env.VITE_API_URL || "http://localhost:5080/api";
 
 export const PRIORITY = {
   High: { label: "Alta", color: "var(--color-priority-high)", dot: "🔴" },

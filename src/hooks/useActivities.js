@@ -85,5 +85,43 @@ export function useActivities(date) {
     [showToast]
   );
 
-  return { activities, loading, createActivity, addTask, toggleTask, deleteTask };
+  const addSubTask = useCallback(async (activityId, taskId, title) => {
+    try {
+      const subTask = await api.addSubTask(taskId, title);
+      setActivities((items) => items.map((activity) => activity.id !== activityId ? activity : {
+        ...activity,
+        tasks: activity.tasks.map((task) => task.id !== taskId ? task : {
+          ...task, subTasks: [...(task.subTasks || []), subTask],
+        }),
+      }));
+      showToast("Subtarea agregada", "success");
+    } catch (error) { showToast(error.message, "error"); }
+  }, [showToast]);
+
+  const toggleSubTask = useCallback(async (activityId, taskId, subTask) => {
+    try {
+      const updated = await api.toggleSubTask(taskId, subTask);
+      setActivities((items) => items.map((activity) => activity.id !== activityId ? activity : {
+        ...activity,
+        tasks: activity.tasks.map((task) => task.id !== taskId ? task : {
+          ...task, subTasks: (task.subTasks || []).map((item) => item.id === subTask.id ? updated : item),
+        }),
+      }));
+    } catch (error) { showToast(error.message, "error"); }
+  }, [showToast]);
+
+  const deleteSubTask = useCallback(async (activityId, taskId, subTaskId) => {
+    try {
+      await api.deleteSubTask(taskId, subTaskId);
+      setActivities((items) => items.map((activity) => activity.id !== activityId ? activity : {
+        ...activity,
+        tasks: activity.tasks.map((task) => task.id !== taskId ? task : {
+          ...task, subTasks: (task.subTasks || []).filter((item) => item.id !== subTaskId),
+        }),
+      }));
+      showToast("Subtarea eliminada", "info");
+    } catch (error) { showToast(error.message, "error"); }
+  }, [showToast]);
+
+  return { activities, loading, createActivity, addTask, toggleTask, deleteTask, addSubTask, toggleSubTask, deleteSubTask };
 }
