@@ -20,12 +20,12 @@ export default function Hero({ activities, onVerDia, onNuevaActividad }) {
         {fmtFullDate(new Date()).toUpperCase()}
       </p>
 
-      <h1 className="font-display text-[clamp(3.5rem,11vw,8rem)] leading-[0.92] font-black tracking-tight text-ink text-balance">
-        Task<span className="text-thread italic">Flow</span>
+      <h1 className="font-display text-[clamp(3.5rem,11vw,8rem)] leading-[0.92] font-black tracking-[-0.03em] text-ink text-balance">
+        TASK<span className="text-thread">FLOW</span>
       </h1>
 
       <p className="mt-6 font-display text-[clamp(1.35rem,3vw,2rem)] font-medium text-ink-soft">
-        {getGreeting()}. Así va tu hilo de hoy.
+        {getGreeting()}
       </p>
 
       <div className="mt-12 flex flex-wrap items-center justify-center gap-3">

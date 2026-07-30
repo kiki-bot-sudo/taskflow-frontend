@@ -56,12 +56,12 @@ export default function AuthScreen({ onAuthenticated }) {
           {fmtFullDate(new Date()).toUpperCase()}
         </p>
 
-        <h1 className="mt-8 font-display text-[clamp(4rem,13vw,7.5rem)] leading-[0.9] font-black tracking-tight">
-          Task<span className="text-thread italic">Flow</span>
+        <h1 className="mt-8 font-display text-[clamp(4rem,13vw,7.5rem)] leading-[0.9] font-black tracking-[-0.03em]">
+          TASK<span className="text-thread">FLOW</span>
         </h1>
 
         <p className="mt-6 font-display text-[clamp(1.25rem,3vw,1.8rem)] font-medium text-ink-soft">
-          {getGreeting()}. Tu día, claro y en orden.
+          {getGreeting()}
         </p>
 
         <div className="stitch-divider mt-10 w-full max-w-md" />

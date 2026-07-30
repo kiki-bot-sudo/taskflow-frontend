@@ -1,29 +1,28 @@
 @import "tailwindcss";
 
 @theme {
-  /* Paper & ink — la "agenda física" */
-  --color-paper: #efe7d8;
-  --color-paper-light: #f7f1e4;
-  --color-paper-dark: #e3d9c2;
-  --color-ink: #24312b;
-  --color-ink-soft: #5b665f;
-  --color-ink-faint: #8a9089;
-  --color-line: #d8cba9;
+  /* Paleta original TaskFlow: negro y dorado */
+  --color-paper: #0a0a0a;
+  --color-paper-light: #111111;
+  --color-paper-dark: #1a1a1a;
+  --color-ink: #f0f0f0;
+  --color-ink-soft: #a3a3a3;
+  --color-ink-faint: #666666;
+  --color-line: #2a2a2a;
 
-  /* Acento firma: hilo/óxido — usado con moderación */
-  --color-thread: #a63d2f;
-  --color-thread-light: #c25340;
-  --color-thread-soft: #a63d2f22;
+  --color-thread: #d4a017;
+  --color-thread-light: #f0c040;
+  --color-thread-soft: #d4a01722;
 
   /* Estado completado */
-  --color-done: #3e6259;
-  --color-done-light: #578477;
-  --color-done-soft: #3e625922;
+  --color-done: #2ed573;
+  --color-done-light: #55e990;
+  --color-done-soft: #2ed57322;
 
   /* Prioridades */
-  --color-priority-high: #a63d2f;
-  --color-priority-normal: #a9822f;
-  --color-priority-low: #3e6259;
+  --color-priority-high: #ff4757;
+  --color-priority-normal: #d4a017;
+  --color-priority-low: #2ed573;
 
   /* Categorías — paleta desaturada, tipo hilos de bordado */
   --color-cat-estudio: #5a5a9c;
@@ -35,13 +34,13 @@
   --color-cat-familia: #a63d2f;
   --color-cat-finanzas: #4a7a4f;
 
-  --font-display: 'Fraunces', ui-serif, Georgia, serif;
+  --font-display: 'Inter', system-ui, sans-serif;
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
-  --shadow-card: 0 1px 2px rgba(36, 49, 43, 0.06), 0 8px 24px -12px rgba(36, 49, 43, 0.18);
-  --shadow-card-hover: 0 2px 4px rgba(36, 49, 43, 0.08), 0 16px 32px -12px rgba(36, 49, 43, 0.24);
-  --shadow-pop: 0 24px 64px -12px rgba(36, 49, 43, 0.35);
+  --shadow-card: 0 8px 24px -12px rgba(0, 0, 0, 0.7);
+  --shadow-card-hover: 0 16px 40px -12px rgba(0, 0, 0, 0.9);
+  --shadow-pop: 0 24px 64px -12px rgba(0, 0, 0, 0.9);
 
   --animate-fade-up: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
   --animate-pop-in: popIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -81,9 +80,8 @@
     background: var(--color-paper);
     color: var(--color-ink);
     min-height: 100vh;
-    background-image:
-      radial-gradient(circle at 1px 1px, rgba(36, 49, 43, 0.05) 1px, transparent 0);
-    background-size: 22px 22px;
+    background-image: radial-gradient(ellipse at 50% 15%, rgba(212, 160, 23, 0.07), transparent 48%);
+    background-attachment: fixed;
   }
 
   #root {
